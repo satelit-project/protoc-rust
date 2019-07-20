@@ -1,5 +1,7 @@
-use prost_build::{CodeGeneratorRequest, CodeGeneratorResponse};
+mod tree;
+
 use prost_build::Config as ProtoConfig;
+use prost_build::{CodeGeneratorRequest, CodeGeneratorResponse};
 use tower_grpc_build::ServiceGenerator;
 
 pub fn generate_response(request: CodeGeneratorRequest) -> std::io::Result<CodeGeneratorResponse> {
@@ -43,9 +45,7 @@ impl Config {
     /// them via comma.
     fn from_request(request: &CodeGeneratorRequest) -> Self {
         let mut conf = Self::default();
-        let opts = request.parameter.as_ref()
-            .map(|s| s.as_str())
-            .unwrap_or("");
+        let opts = request.parameter.as_ref().map(|s| s.as_str()).unwrap_or("");
 
         for opt in opts.split(',') {
             match opt {
