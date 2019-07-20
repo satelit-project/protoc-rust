@@ -4,6 +4,14 @@ version = "0.1.0"
 authors = ["Igor Nikitin <rabbitinspace@icloud.com>"]
 edition = "2018"
 
+description = "'protoc' plugin based on 'prost' and 'tower-grpc'."
+repository = "https://github.com/satelit-project/protoc-rust"
+keywords = ["protoc", "protobuf", "grpc"]
+categories = ["command-line-utilities", "development-tools"]
+readme = "README.md"
+license = "MIT"
+license-file = "LICENSE"
+
 [[bin]]
 name = "protoc-gen-rust"
 path = "src/main.rs"

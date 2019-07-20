@@ -1,15 +1,26 @@
 use prost_build::code_generator_response::File;
 use prost_build::CodeGeneratorResponse;
 
+/// Tree structure that represents rust's module hierarchy
 #[derive(Debug)]
 pub struct ModuleTree<'a> {
+    /// Module name
     name: &'a str,
+
+    /// Content of the module
     content: Option<&'a str>,
+
+    /// Module's submodules
     children: Vec<ModuleTree<'a>>,
 }
 
 impl<'a> From<&'a CodeGeneratorResponse> for ModuleTree<'a> {
+    /// Creates module tree from 'protoc' response with flat modules
+    ///
+    /// A file for a flat module should be named like 'parent.child.file.rs'. This way
+    /// we can infer actual module hierarchy.
     fn from(response: &'a CodeGeneratorResponse) -> Self {
+        // mod.rs for a code output directory (top-level module)
         let mut root = ModuleTree {
             name: "",
             content: None,
@@ -28,7 +39,7 @@ impl<'a> From<&'a CodeGeneratorResponse> for ModuleTree<'a> {
             if let Some(name) = file.name.as_ref() {
                 let path = name.trim_end_matches(".rs").split('.').collect();
                 let content = file.content.as_ref().map(|s| s.as_str());
-                put_content(content, path, &mut root);
+                create_subtree(content, path, &mut root);
             }
         }
 
@@ -37,6 +48,7 @@ impl<'a> From<&'a CodeGeneratorResponse> for ModuleTree<'a> {
 }
 
 impl<'a> From<ModuleTree<'a>> for CodeGeneratorResponse {
+    /// Creates `CodeGeneratorResponse` with modules which respects proto's package definition
     fn from(root: ModuleTree<'a>) -> Self {
         let mut response = CodeGeneratorResponse {
             error: None,
@@ -45,14 +57,21 @@ impl<'a> From<ModuleTree<'a>> for CodeGeneratorResponse {
 
         for child in &root.children {
             let path = vec![child.name];
-            put_node(&mut response, path, child);
+            write_subtree(&mut response, path, child);
         }
 
         response
     }
 }
 
-fn put_content<'a, 'b>(
+/// Puts module content to the right node in modules tree
+///
+/// # Arguments
+///
+/// * `content` – content of the module (generated source code)
+/// * `path` – path to the module related to a top-level module (like ['parent', 'child', 'file'])
+/// * `root` – root node of a top-level module
+fn create_subtree<'a, 'b>(
     content: Option<&'a str>,
     mut path: Vec<&'a str>,
     root: &'b mut ModuleTree<'a>,
@@ -66,7 +85,7 @@ fn put_content<'a, 'b>(
     let existing = root.children.iter_mut().find(|e| e.name.eq(name));
 
     if let Some(child) = existing {
-        put_content(content, path, child);
+        create_subtree(content, path, child);
     } else {
         let mut child = ModuleTree {
             name,
@@ -74,12 +93,19 @@ fn put_content<'a, 'b>(
             children: vec![],
         };
 
-        put_content(content, path, &mut child);
+        create_subtree(content, path, &mut child);
         root.children.push(child);
     }
 }
 
-fn put_node<'a, 'b>(
+/// Translates a module hierarchy to rust files
+///
+/// # Arguments
+///
+/// * `response` – 'protoc' response to place files
+/// * `path` – module path relative to a top-level module (like ['parent'])
+/// * `root` – root node of a top-level module
+fn write_subtree<'a, 'b>(
     response: &'b mut CodeGeneratorResponse,
     path: Vec<&'a str>,
     root: &'b ModuleTree<'a>,
@@ -95,7 +121,7 @@ fn put_node<'a, 'b>(
 
         let mut path_cpy = path.clone();
         path_cpy.push(child.name);
-        put_node(response, path_cpy, child);
+        write_subtree(response, path_cpy, child);
     }
 
     if let Some(node_content) = root.content {

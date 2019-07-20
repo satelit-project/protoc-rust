@@ -6,6 +6,10 @@ use tower_grpc_build::ServiceGenerator;
 
 use tree::ModuleTree;
 
+/// Generates response for 'protoc' compiler by processing it's request
+///
+/// This function will generate code for proto files from `CodeGeneratorRequest` that
+/// 'protoc' compiler passes to it's plugins and will return it in expected format.
 pub fn generate_response(request: CodeGeneratorRequest) -> std::io::Result<CodeGeneratorResponse> {
     let config = Config::from_request(&request);
 
@@ -16,10 +20,16 @@ pub fn generate_response(request: CodeGeneratorRequest) -> std::io::Result<CodeG
     let mut proto_config = ProtoConfig::new();
     proto_config.service_generator(Box::new(service_gen));
 
-    let response = proto_config.compile_request(request)?;
-    Ok(modularize_response(response))
+    let mut response = proto_config.compile_request(request)?;
+    if !config.flat_modules {
+        response = modularize_response(response)
+    }
+
+    Ok(response)
 }
 
+/// Modifies `CodeGeneratorResponse` to have module hierarchy that respects
+/// package declaration for provided proto files
 fn modularize_response(response: CodeGeneratorResponse) -> CodeGeneratorResponse {
     let modules = ModuleTree::from(&response);
     modules.into()
@@ -27,8 +37,26 @@ fn modularize_response(response: CodeGeneratorResponse) -> CodeGeneratorResponse
 
 /// Code generation configuration
 struct Config {
+    /// Generate client side RPC services
     gen_grpc_client: bool,
+
+    /// Generate server side RPC services
     gen_grpc_server: bool,
+
+    /// Generate proto files as top-level modules
+    ///
+    /// If `true` then generated code will be placed in a top-level module without respecting
+    /// package hierarchy. For example, for package 'foo.bar' the code will be placed in
+    /// 'foo.bar' rust module.
+    ///
+    /// If `false` then generated code will respect proto's package declaration and for
+    /// each package a new rust module will be generated. For example, for package 'foo.bar'
+    /// the code will be placed in module 'bar' which is submodule of 'foo' module.
+    ///
+    /// **NOTE:** Module hierarchy is inferred from proto files that has been provided to
+    /// 'protoc' compiler. So, to be able to correctly infer module hierarchy, all proto files
+    /// that corresponds to the same root package must be provided to 'protoc' at once.
+    flat_modules: bool,
 }
 
 impl Default for Config {
@@ -36,6 +64,7 @@ impl Default for Config {
         Config {
             gen_grpc_client: false,
             gen_grpc_server: false,
+            flat_modules: true,
         }
     }
 }
@@ -58,6 +87,7 @@ impl Config {
                 }
                 "grpc-client" => conf.gen_grpc_client = true,
                 "grpc-server" => conf.gen_grpc_server = true,
+                "no-flat-modules" => conf.flat_modules = false,
                 _ => (),
             }
         }
