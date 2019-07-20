@@ -42,23 +42,11 @@ impl<'a> From<ModuleTree<'a>> for CodeGeneratorResponse {
             error: None,
             file: vec![],
         };
-        let mut modrs = String::new();
-        modrs.push_str("#![allow(clippy::all)]\n\n"); // TODO: make configurable
 
         for child in &root.children {
-            modrs.push_str("pub mod ");
-            modrs.push_str(child.name);
-            modrs.push_str(";\n");
-
             let path = vec![child.name];
             put_node(&mut response, path, child);
         }
-
-        response.file.push(File {
-            name: Some(String::from("mod.rs")),
-            insertion_point: None,
-            content: Some(modrs),
-        });
 
         response
     }

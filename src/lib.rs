@@ -4,6 +4,8 @@ use prost_build::Config as ProtoConfig;
 use prost_build::{CodeGeneratorRequest, CodeGeneratorResponse};
 use tower_grpc_build::ServiceGenerator;
 
+use tree::ModuleTree;
+
 pub fn generate_response(request: CodeGeneratorRequest) -> std::io::Result<CodeGeneratorResponse> {
     let config = Config::from_request(&request);
 
@@ -19,7 +21,8 @@ pub fn generate_response(request: CodeGeneratorRequest) -> std::io::Result<CodeG
 }
 
 fn modularize_response(response: CodeGeneratorResponse) -> CodeGeneratorResponse {
-    response
+    let modules = ModuleTree::from(&response);
+    modules.into()
 }
 
 /// Code generation configuration
