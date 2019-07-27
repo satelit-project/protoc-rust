@@ -16,6 +16,9 @@ license-file = "LICENSE"
 name = "protoc-gen-rust"
 path = "src/main.rs"
 
+[features]
+tower-hyper = ["tower-grpc-build/tower-hyper"]
+
 [dependencies]
 prost-build = { git = "https://github.com/satelit-project/prost.git", branch = "v0.5.0-protoc" }
 tower-grpc-build = { git = "https://github.com/satelit-project/tower-grpc.git", branch = "v0.1.0-protoc" }
