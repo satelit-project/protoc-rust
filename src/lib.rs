@@ -102,7 +102,7 @@ impl Config {
                 "grpc-client" => conf.gen_grpc_client = true,
                 "grpc-server" => conf.gen_grpc_server = true,
                 "no-flat-modules" => conf.flat_modules = false,
-                paths if paths.starts_with("extern_path=") => {
+                paths if paths.starts_with("extern-path=") => {
                     let mut parts = paths.split('=').skip(1);
                     let proto_path = parts.next().expect("proto path not found");
                     let rust_path = parts.next().expect("rust path not found");
