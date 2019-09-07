@@ -4,6 +4,8 @@ use prost_build::Config as ProtoConfig;
 use prost_build::{CodeGeneratorRequest, CodeGeneratorResponse};
 use tower_grpc_build::ServiceGenerator;
 
+use std::string::ToString;
+
 use tree::ModuleTree;
 
 /// Generates response for 'protoc' compiler by processing it's request
@@ -19,6 +21,10 @@ pub fn generate_response(request: CodeGeneratorRequest) -> std::io::Result<CodeG
 
     let mut proto_config = ProtoConfig::new();
     proto_config.service_generator(Box::new(service_gen));
+
+    for (proto, rust) in &config.extern_paths {
+        proto_config.extern_path(proto, rust);
+    }
 
     let mut response = proto_config.compile_request(request)?;
     if !config.flat_modules {
@@ -43,6 +49,13 @@ struct Config {
     /// Generate server side RPC services
     gen_grpc_server: bool,
 
+    /// External crates for Protobuf types
+    ///
+    /// See this[^1] method's documentation.
+    ///
+    /// [^1]: https://github.com/danburkert/prost/blob/c2c6feaee0eebd9eb71f6e9fb20e26fd0ef2a0c8/prost-build/src/lib.rs#L442
+    extern_paths: Vec<(String, String)>,
+
     /// Generate proto files as top-level modules
     ///
     /// If `true` then generated code will be placed in a top-level module without respecting
@@ -64,6 +77,7 @@ impl Default for Config {
         Config {
             gen_grpc_client: false,
             gen_grpc_server: false,
+            extern_paths: Vec::new(),
             flat_modules: true,
         }
     }
@@ -88,6 +102,14 @@ impl Config {
                 "grpc-client" => conf.gen_grpc_client = true,
                 "grpc-server" => conf.gen_grpc_server = true,
                 "no-flat-modules" => conf.flat_modules = false,
+                paths if paths.starts_with("extern_path=") => {
+                    let mut parts = paths.split('=').skip(1);
+                    let proto_path = parts.next().expect("proto path not found");
+                    let rust_path = parts.next().expect("rust path not found");
+
+                    let pair = (proto_path.to_string(), rust_path.to_string());
+                    conf.extern_paths.push(pair);
+                }
                 _ => (),
             }
         }
