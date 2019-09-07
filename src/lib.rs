@@ -86,7 +86,7 @@ impl Default for Config {
 impl Config {
     /// Parses configuration from request parameters
     ///
-    /// To pass custom parameters you need to specify `--rust_opts` argument
+    /// To pass custom parameters you need to specify `--rust_opt` argument
     /// for `protoc` compiler. Multiple parameters may be passed by separating
     /// them via comma.
     fn from_request(request: &CodeGeneratorRequest) -> Self {
