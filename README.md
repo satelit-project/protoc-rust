@@ -49,6 +49,7 @@ Available flags are:
 * `grpc-server` – generate server side code for gRPC services.
 * `no-flat-modules` – map protobuf packages to Rust modules (See
   `Config` documentation for pitfalls).
+* `extern-path` – [map Protobuf types to Rust types](https://docs.rs/prost-build/0.5.0/prost_build/struct.Config.html#method.extern_path)
   
 Additionally, if you want generated services to be compatible with
 `tower-hyper` crate, install plugin with `tower-hyper` feature enabled.
