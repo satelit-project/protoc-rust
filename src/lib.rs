@@ -1,8 +1,8 @@
 mod tree;
 
+use tonic_build;
 use prost_build::Config as ProtoConfig;
 use prost_build::{CodeGeneratorRequest, CodeGeneratorResponse};
-use tower_grpc_build::ServiceGenerator;
 
 use std::string::ToString;
 
@@ -15,12 +15,13 @@ use tree::ModuleTree;
 pub fn generate_response(request: CodeGeneratorRequest) -> std::io::Result<CodeGeneratorResponse> {
     let config = Config::from_request(&request);
 
-    let mut service_gen = ServiceGenerator::default();
-    service_gen.enable_client(config.gen_grpc_client);
-    service_gen.enable_server(config.gen_grpc_server);
-
+    let service_gen: Box<_> = tonic_build::configure()
+        .build_client(config.gen_grpc_client)
+        .build_server(config.gen_grpc_server)
+        .into();
+    
     let mut proto_config = ProtoConfig::new();
-    proto_config.service_generator(Box::new(service_gen));
+    proto_config.service_generator(service_gen);
 
     for (proto, rust) in &config.extern_paths {
         proto_config.extern_path(proto, rust);

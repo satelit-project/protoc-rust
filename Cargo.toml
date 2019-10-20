@@ -1,10 +1,10 @@
 [package]
 name = "protoc-rust"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 authors = ["Igor Nikitin <rabbitinspace@icloud.com>"]
 edition = "2018"
 
-description = "'protoc' plugin based on 'prost' and 'tower-grpc'."
+description = "'protoc' plugin based on 'prost' and 'tonic'."
 repository = "https://github.com/satelit-project/protoc-rust"
 keywords = ["protoc", "protobuf", "grpc"]
 categories = ["command-line-utilities", "development-tools"]
@@ -16,12 +16,9 @@ license-file = "LICENSE"
 name = "protoc-gen-rust"
 path = "src/main.rs"
 
-[features]
-tower-hyper = ["tower-grpc-build/tower-hyper"]
-
 [dependencies]
 prost-build = { git = "https://github.com/satelit-project/prost.git", branch = "v0.5.0-protoc" }
-tower-grpc-build = { git = "https://github.com/satelit-project/tower-grpc.git", branch = "v0.1.0-protoc" }
+tonic-build = { git = "https://github.com/satelit-project/tonic.git", branch = "protoc" }
 
 [patch.crates-io]
 prost-build = { git = "https://github.com/satelit-project/prost.git", branch = "v0.5.0-protoc" }
