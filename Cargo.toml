@@ -1,6 +1,6 @@
 [package]
 name = "protoc-rust"
-version = "0.2.0-alpha.1"
+version = "0.2.0-beta.1"
 authors = ["Igor Nikitin <rabbitinspace@icloud.com>"]
 edition = "2018"
 
@@ -17,8 +17,11 @@ name = "protoc-gen-rust"
 path = "src/main.rs"
 
 [dependencies]
-prost-build = { git = "https://github.com/satelit-project/prost.git", branch = "v0.5.0-protoc" }
-tonic-build = { git = "https://github.com/satelit-project/tonic.git", branch = "protoc" }
+prost-build = { git = "https://github.com/satelit-project/prost.git", branch = "satelit" }
+tonic-build = { git = "https://github.com/satelit-project/tonic.git", branch = "satelit" }
 
 [patch.crates-io]
-prost-build = { git = "https://github.com/satelit-project/prost.git", branch = "v0.5.0-protoc" }
+prost = { git = "https://github.com/satelit-project/prost.git", branch = "satelit" }
+prost-build = { git = "https://github.com/satelit-project/prost.git", branch = "satelit" }
+prost-types = { git = "https://github.com/satelit-project/prost.git", branch = "satelit" }
+prost-derive = { git = "https://github.com/satelit-project/prost.git", branch = "satelit" }

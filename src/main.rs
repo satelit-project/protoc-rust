@@ -11,7 +11,7 @@ fn main() -> std::io::Result<()> {
     stdin().read_to_end(&mut input)?;
 
     // generate protos
-    let request = CodeGeneratorRequest::decode(&input).unwrap();
+    let request = CodeGeneratorRequest::decode(input.as_ref()).unwrap();
     let response = generate_response(request)?;
 
     // write response

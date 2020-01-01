@@ -1,8 +1,8 @@
 mod tree;
 
-use tonic_build;
 use prost_build::Config as ProtoConfig;
 use prost_build::{CodeGeneratorRequest, CodeGeneratorResponse};
+use tonic_build;
 
 use std::string::ToString;
 
@@ -14,12 +14,9 @@ use tree::ModuleTree;
 /// 'protoc' compiler passes to it's plugins and will return it in expected format.
 pub fn generate_response(request: CodeGeneratorRequest) -> std::io::Result<CodeGeneratorResponse> {
     let config = Config::from_request(&request);
+    let service_gen: Box<_> =
+        tonic_build::service_generator(config.gen_grpc_client, config.gen_grpc_server).into();
 
-    let service_gen: Box<_> = tonic_build::configure()
-        .build_client(config.gen_grpc_client)
-        .build_server(config.gen_grpc_server)
-        .into();
-    
     let mut proto_config = ProtoConfig::new();
     proto_config.service_generator(service_gen);
 
