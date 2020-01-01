@@ -34,7 +34,7 @@ protoc \
   <proto file>...
 ```
 
-Or use custom tools like [`prototool`](https://github.com/uber/prototool) like in [`satelit-proto`](https://github.com/satelit-project/satelit-proto) project.
+Or use custom tools like [`protogen`](https://github.com/satelit-project/protogen) like in [`satelit-proto`](https://github.com/satelit-project/satelit-proto) project.
 
 ### Customization
 
