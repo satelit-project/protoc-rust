@@ -16,7 +16,7 @@ Plugin can be installed via `cargo install`:
 ```
 cargo install protoc-rust \
   --git "https://github.com/satelit-project/protoc-rust" \
-  --tag 0.2.0-alpha.1 \
+  --tag 0.2.0-beta.1 \
   --force
 ```
 
